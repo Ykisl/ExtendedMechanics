@@ -16,5 +16,6 @@ public class ModEventBusEvents
 	@SubscribeEvent
     public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent)
     {
+		
     }
 }

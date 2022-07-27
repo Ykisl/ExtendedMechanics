@@ -1,27 +1,21 @@
 package com.ykisl.extendedmechanics;
 
 import com.mojang.logging.LogUtils;
+import com.ykisl.extendedmechanics.blocks.ModBlockEntities;
+import com.ykisl.extendedmechanics.blocks.ModBlocks;
 import com.ykisl.extendedmechanics.events.EventBusEvents;
+import com.ykisl.extendedmechanics.items.ModItems;
 
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-import org.apache.commons.compress.harmony.pack200.NewAttribute;
-import org.jetbrains.annotations.Debug;
 import org.slf4j.Logger;
-
-import java.util.stream.Collectors;
 
 @Mod(ExtendedMechanics.MODID)
 public class ExtendedMechanics
@@ -34,21 +28,28 @@ public class ExtendedMechanics
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
         
+        var eventBus = GetEventBus();
+        
+		ModBlocks.Register(eventBus);
+		ModBlockEntities.Register(eventBus);
+		ModItems.Register(eventBus);
+        
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new EventBusEvents());
     }
     
 	public void setup(final FMLCommonSetupEvent event)
     {
-    	var logger = ExtendedMechanics.GetLogger();
-    	
-    	logger.info("HELLO FROM PREINIT");
-    	logger.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+		var eventBus = GetEventBus();
     }
 	
     public void onClientSetup(FMLClientSetupEvent event)
     {
-		LOGGER.debug("CLIENT SETUP");
+    	var eventBus = GetEventBus();
+    	
+    	ModBlocks.ClientSetup(event, eventBus);
+		ModBlockEntities.ClientSetup(event, eventBus);
+		ModItems.ClientSetup(event, eventBus);
     }
 	
 	@SubscribeEvent
@@ -61,5 +62,10 @@ public class ExtendedMechanics
     public static Logger GetLogger() 
     {
     	return LOGGER;
+    }
+    
+    private IEventBus GetEventBus() 
+    {
+    	return FMLJavaModLoadingContext.get().getModEventBus();
     }
 }
